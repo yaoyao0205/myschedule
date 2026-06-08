@@ -42,7 +42,7 @@ const initialTasks: Task[] = [
     id: "task-focus-setup",
     listId: DEFAULT_TASK_LIST_ID,
     title: "梳理本周最重要的 3 个目标",
-    note: "用 yaoyaoflow 只留下真正需要推进的事情。",
+    note: "用 myschedule 只留下真正需要推进的事情。",
     priority: "high",
     dueDate: todayInputValue(),
     startTime: "09:00",
@@ -130,7 +130,7 @@ function normalizeTasks(tasks: Task[]): Task[] {
   return tasks.map((task, index) => ({
     ...task,
     listId: task.listId || DEFAULT_TASK_LIST_ID,
-    note: (task.note ?? "").replace(/FocusFlow/g, "yaoyaoflow"),
+    note: (task.note ?? "").replace(/FocusFlow/g, "myschedule"),
     dueDate: task.dueDate ?? "",
     startTime: task.startTime ?? "",
     endTime: task.endTime ?? "",

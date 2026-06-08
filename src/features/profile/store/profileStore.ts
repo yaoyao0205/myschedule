@@ -97,7 +97,7 @@ export const useProfileStore = create<ProfileState>()(
       theoClicks: 0,
       theoFood: 18,
       theoName: "西奥",
-      username: "yaoyaoflow 用户",
+      username: "myschedule 用户",
       feedTheo: () =>
         set((state) => ({
           feedCount: state.theoFood > 0 ? state.feedCount + 1 : state.feedCount,
@@ -114,7 +114,7 @@ export const useProfileStore = create<ProfileState>()(
           email: "",
           phone: "",
           signature: "",
-          username: "yaoyaoflow 用户",
+          username: "myschedule 用户",
         }),
       resetTheoProgress: () => set({ feedCount: 0, theoFood: 0, theoClicks: 0 }),
       setAvatarUrl: (avatarUrl) => set({ avatarUrl }),

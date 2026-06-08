@@ -96,7 +96,7 @@ function importExportPayload(payload: unknown): number {
     .map((key) => [key, payload[key]] as const)
 
   if (!entries.length) {
-    throw new Error("没有找到可导入的 yaoyaoflow 数据")
+    throw new Error("没有找到可导入的 myschedule 数据")
   }
 
   entries.forEach(([key, value]) => {
@@ -190,7 +190,7 @@ export function ProfilePage() {
   }, [activeModule, topBarSlot])
 
   function exportData() {
-    downloadJson(`yaoyaoflow_export_${dateKey(new Date()).replace(/-/g, "")}.json`, buildExportPayload())
+    downloadJson(`myschedule_export_${dateKey(new Date()).replace(/-/g, "")}.json`, buildExportPayload())
     notify("数据已导出", "success")
   }
 
@@ -246,7 +246,7 @@ export function ProfilePage() {
             <h2 className="text-lg font-semibold text-rose-700">确认执行这个操作？</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--ff-muted)]">
               {dangerAction === "clearData"
-                ? "这会清除本机 yaoyaoflow 的任务、笔记、提醒、番茄和个人设置。建议先导出 JSON。"
+                ? "这会清除本机 myschedule 的任务、笔记、提醒、番茄和个人设置。建议先导出 JSON。"
                 : "这会清空头像、用户名、签名和账号绑定信息，但不会删除任务和笔记。"}
             </p>
             <div className="mt-5 flex justify-end gap-3">
@@ -301,8 +301,8 @@ function IdentityModule({ profile }: { profile: ProfileState }) {
             )}
           </div>
           <div>
-            <p className="text-sm text-[var(--ff-muted)]">yaoyaoflow Space</p>
-            <h2 className="text-2xl font-semibold text-[var(--ff-ink-900)]">{profile.username || "yaoyaoflow 用户"}</h2>
+            <p className="text-sm text-[var(--ff-muted)]">myschedule Space</p>
+            <h2 className="text-2xl font-semibold text-[var(--ff-ink-900)]">{profile.username || "myschedule 用户"}</h2>
           </div>
         </div>
         <p className="mt-4 rounded-xl bg-[var(--ff-surface-muted)] px-4 py-3 text-sm leading-6 text-[var(--ff-muted)]">
@@ -486,7 +486,7 @@ function DataModule({
       <section className="ff-card p-5">
         <Trash2 className="h-6 w-6 text-rose-500" />
         <h2 className="mt-3 text-lg font-semibold text-[var(--ff-ink-900)]">清除数据</h2>
-        <p className="mt-2 text-sm leading-6 text-[var(--ff-muted)]">清空本机所有 yaoyaoflow 数据。建议先导出 JSON。</p>
+        <p className="mt-2 text-sm leading-6 text-[var(--ff-muted)]">清空本机所有 myschedule 数据。建议先导出 JSON。</p>
         <button className="mt-4 rounded-lg bg-rose-600 px-4 py-3 text-sm font-semibold text-white" type="button" onClick={() => setDangerAction("clearData")}>
           清除本地数据
         </button>

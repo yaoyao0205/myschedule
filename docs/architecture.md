@@ -1,6 +1,6 @@
-# yaoyaoflow Architecture
+# myschedule Architecture
 
-yaoyaoflow is a multi-device schedule manager for tasks, notes, calendar, reminders, pomodoro, countdowns, and integrations.
+myschedule is a multi-device schedule manager for tasks, notes, calendar, reminders, pomodoro, countdowns, and integrations.
 
 ## Project Structure
 
@@ -113,7 +113,7 @@ flowchart TD
 - Tasks are persisted with Zustand `persist` middleware.
 - Notes are persisted with Zustand `persist` middleware.
 - Calendar view state is persisted with Zustand `persist` middleware.
-- Local persistence keeps the legacy `focusflow.*` keys for migration compatibility while the product is branded as yaoyaoflow.
+- Local persistence keeps the legacy `focusflow.*` keys for migration compatibility while the product is branded as myschedule.
 - Ephemeral UI state such as selected task checkboxes is intentionally not persisted.
 - Drag ordering is stored as an `order` number on each task.
 - Keyboard shortcuts currently implemented: `N` opens the task editor and `Cmd/Ctrl + K` opens the command palette.

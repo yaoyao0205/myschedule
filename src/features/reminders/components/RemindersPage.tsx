@@ -62,7 +62,7 @@ const quickTimeOptions = [
 function sendReminderNotification(reminder: Reminder) {
   if (!("Notification" in window) || Notification.permission !== "granted") return
   new Notification(reminder.title, {
-    body: "yaoyaoflow · 点击查看详情",
+    body: "myschedule · 点击查看详情",
     tag: reminder.id,
   }).onclick = () => {
     window.focus()
@@ -600,7 +600,7 @@ function ReminderBanner({
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{reminder.title}</p>
-          <p className="truncate text-xs text-amber-700">yaoyaoflow · 点击查看详情</p>
+          <p className="truncate text-xs text-amber-700">myschedule · 点击查看详情</p>
         </div>
         <button className="ff-button-secondary bg-white px-3 py-2 text-sm" type="button" onClick={() => onComplete(reminder.id)}>
           完成
@@ -838,7 +838,7 @@ function NotificationPermissionSheet({ onAllow, onClose }: { onAllow: () => void
         <div className="grid h-12 w-12 place-items-center rounded-xl bg-[var(--ff-brand-soft)] text-indigo-600">
           <Bell className="h-5 w-5" />
         </div>
-        <h2 className="mt-4 text-lg font-semibold text-slate-950 dark:text-slate-100">yaoyaoflow 需要发送提醒通知</h2>
+        <h2 className="mt-4 text-lg font-semibold text-slate-950 dark:text-slate-100">myschedule 需要发送提醒通知</h2>
         <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
           授权后，即使你切到别的页面，也能收到系统提醒。拒绝也没关系，提醒仍会保存并在应用内显示。
         </p>

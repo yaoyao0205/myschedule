@@ -23,7 +23,7 @@ export class PageErrorBoundary extends Component<PageErrorBoundaryProps, PageErr
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("yaoyaoflow page render failed", error, errorInfo)
+    console.error("myschedule page render failed", error, errorInfo)
   }
 
   render() {

@@ -31,11 +31,11 @@ const initialNoteGroups: NoteGroup[] = [
 
 const initialNotes: Note[] = [
   {
-    id: "note-yaoyaoflow-roadmap",
+    id: "note-myschedule-roadmap",
     groupId: DEFAULT_NOTE_GROUP_ID,
-    title: "yaoyaoflow 产品节奏",
+    title: "myschedule 产品节奏",
     content: normalizeNoteContent(
-      "# yaoyaoflow 产品节奏\n\n- 先把任务清单变成可靠工作台\n- 日历负责整理日程\n- 笔记承接任务背后的上下文\n\n## 本周重点\n\n**任务与日历打通**，让计划不是孤岛。"
+      "# myschedule 产品节奏\n\n- 先把任务清单变成可靠工作台\n- 日历负责整理日程\n- 笔记承接任务背后的上下文\n\n## 本周重点\n\n**任务与日历打通**，让计划不是孤岛。"
     ),
     tags: ["产品", "规划"],
     linkedTaskIds: ["task-focus-setup", "task-calendar-review"],

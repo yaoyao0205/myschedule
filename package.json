@@ -1,8 +1,8 @@
 {
-  "name": "yaoyaoflow",
+  "name": "myschedule",
   "private": true,
   "version": "1.0.0",
-  "description": "yaoyaoflow multi-device schedule manager",
+  "description": "myschedule multi-device schedule manager",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -58,8 +58,8 @@
     "vite": "^8.0.12"
   },
   "build": {
-    "appId": "com.yaoyaoflow.desktop",
-    "productName": "yaoyaoflow",
+    "appId": "com.myschedule.desktop",
+    "productName": "myschedule",
     "directories": {
       "output": "release"
     },

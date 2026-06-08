@@ -79,7 +79,7 @@ export function AppShell() {
                   <span className="text-base leading-none">{page.emoji}</span>
                 </div>
                 <div className="min-w-0">
-                  <p className="ff-mono truncate text-[9px] uppercase text-[var(--ff-muted)]">yaoyaoflow</p>
+                  <p className="ff-mono truncate text-[9px] uppercase text-[var(--ff-muted)]">myschedule</p>
                   <h1 className="ff-display truncate text-[15px] text-[var(--ff-text)]">{page.name}</h1>
                 </div>
               </div>

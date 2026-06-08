@@ -267,7 +267,7 @@ async function createCountdownShareImage(event: CountdownEvent) {
 
   ctx.fillStyle = "#11131A"
   ctx.font = "700 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-  ctx.fillText("yaoyaoflow", 112, 1310)
+  ctx.fillText("myschedule", 112, 1310)
   ctx.fillStyle = "#8A909D"
   ctx.font = "400 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   ctx.fillText("把重要日子放在时间流里", 112, 1348)

@@ -1,4 +1,4 @@
-# MySchedule / yaoyaoflow
+# myschedule
 
 一个本地优先的个人日程与效率工作台，集成任务清单、日历、倒数日、提醒、番茄钟和富文本笔记。项目支持多主题外观、图片识别日程、笔记多媒体附件、Markdown 导入和 Notion 同步能力。
 

@@ -67,7 +67,7 @@ export function TaskEditor({ task, initialDraft, includeCountdownType = false, t
           <div>
             <p className="text-sm font-medium text-indigo-500">{isCountdownDraft ? "新建日子" : task ? "编辑任务" : "新建任务"}</p>
             <h2 className="text-xl font-semibold text-slate-950 dark:text-slate-100">
-              {isCountdownDraft ? "把重要日子放进时间流" : task ? "让这条任务更清晰" : "把想法放进 yaoyaoflow"}
+              {isCountdownDraft ? "把重要日子放进时间流" : task ? "让这条任务更清晰" : "把想法放进 myschedule"}
             </h2>
           </div>
           <button className="ff-icon-button h-11 w-11" type="button" onClick={onClose} aria-label="关闭">

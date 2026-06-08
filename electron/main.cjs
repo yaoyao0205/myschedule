@@ -28,7 +28,7 @@ function createWindow() {
     height: 960,
     minWidth: 1080,
     minHeight: 760,
-    title: "yaoyaoflow",
+    title: "myschedule",
     backgroundColor: "#edf2ff",
     autoHideMenuBar: true,
     webPreferences: {
@@ -68,7 +68,7 @@ function createWindow() {
       console.log("[renderer] did-finish-load", snapshot);
 
       const image = await mainWindow.webContents.capturePage();
-      const capturePath = path.join(app.getPath("temp"), "yaoyaoflow-electron-capture.png");
+      const capturePath = path.join(app.getPath("temp"), "myschedule-electron-capture.png");
       fs.writeFileSync(capturePath, image.toPNG());
       console.log("[renderer] capturePage", capturePath);
     } catch (error) {
@@ -236,7 +236,7 @@ async function parseExternalLink(url) {
       headers: {
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125 Safari/537.36 yaoyaoflow/1.0",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125 Safari/537.36 myschedule/1.0",
       },
       redirect: "follow",
       signal: controller.signal,
@@ -287,7 +287,7 @@ async function writeDataUrlImageToTemp(dataUrl) {
     throw new Error("图片为空");
   }
 
-  const filePath = path.join(app.getPath("temp"), `yaoyaoflow-calendar-ocr-${Date.now()}.${imageExtensionFromMime(mimeType)}`);
+  const filePath = path.join(app.getPath("temp"), `myschedule-calendar-ocr-${Date.now()}.${imageExtensionFromMime(mimeType)}`);
   await fs.promises.writeFile(filePath, buffer);
   return filePath;
 }
@@ -325,7 +325,7 @@ function sendPendingNotionCallback() {
 
 function maybeHandleProtocolUrl(value) {
   if (typeof value !== "string") return false;
-  if (!value.startsWith("yaoyaoflow://notion/callback") && !value.startsWith("focusflow://notion/callback")) return false;
+  if (!value.startsWith("myschedule://notion/callback") && !value.startsWith("focusflow://notion/callback")) return false;
   handleNotionCallback(value);
   return true;
 }
@@ -360,10 +360,10 @@ function startNotionCallbackServer() {
     response.end(`
       <!doctype html>
       <html lang="zh-CN">
-        <head><meta charset="utf-8"><title>yaoyaoflow Notion OAuth</title></head>
+        <head><meta charset="utf-8"><title>myschedule Notion OAuth</title></head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: grid; min-height: 100vh; place-items: center; margin: 0;">
           <main style="text-align: center;">
-            <h1>Notion 授权已返回 yaoyaoflow</h1>
+            <h1>Notion 授权已返回 myschedule</h1>
             <p>可以关闭这个浏览器窗口，回到应用继续。</p>
             <script>setTimeout(() => window.close(), 800)</script>
           </main>
@@ -454,7 +454,7 @@ ipcMain.handle("calendar:recognize-image", async (_event, payload) => {
 
 app.whenReady().then(() => {
   startNotionCallbackServer();
-  app.setAsDefaultProtocolClient("yaoyaoflow");
+  app.setAsDefaultProtocolClient("myschedule");
   app.setAsDefaultProtocolClient("focusflow");
   createWindow();
   sendPendingNotionCallback();
