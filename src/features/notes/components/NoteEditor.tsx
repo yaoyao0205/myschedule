@@ -31,6 +31,7 @@ import {
   ListOrdered,
   Pilcrow,
   MoreHorizontal,
+  Sparkles,
   Strikethrough,
   Tags,
   UnderlineIcon,
@@ -44,10 +45,38 @@ import { cn } from "../../../lib/cn"
 import { createId } from "../../../lib/ids"
 import type { Task } from "../../tasks/types"
 import type { Note, NoteAttachment, NoteDraft, NoteGroup } from "../types"
-import { escapeHtml, formatRelativeTime, markdownToHtml, noteToDraft } from "../utils"
+import { escapeHtml, formatRelativeTime, htmlToMarkdown, markdownToHtml, noteToDraft } from "../utils"
 import { RichCodeBlock } from "./RichCodeBlock"
 
 const lowlight = createLowlight(all)
+
+const noteTemplates = [
+  {
+    id: "meeting",
+    label: "会议纪要",
+    markdown: "## 会议目标\n\n- \n\n## 结论\n\n- \n\n## Action Items\n\n- [ ] 负责人 / 截止时间 / 下一步\n",
+  },
+  {
+    id: "course",
+    label: "课程记录",
+    markdown: "## 课程主题\n\n## 关键知识点\n\n- \n\n## 练习 / 作业\n\n- [ ] \n\n## 疑问\n\n- \n",
+  },
+  {
+    id: "training",
+    label: "训练复盘",
+    markdown: "## 今日训练\n\n- 项目：\n- 时长：\n- 强度：\n\n## 体感记录\n\n## 下次调整\n\n- [ ] \n",
+  },
+  {
+    id: "requirements",
+    label: "需求池",
+    markdown: "## 背景\n\n## 用户问题\n\n## 方案草案\n\n## 验收标准\n\n- [ ] \n",
+  },
+  {
+    id: "reading",
+    label: "读书笔记",
+    markdown: "## 书 / 文章\n\n## 核心观点\n\n- \n\n## 摘录\n\n> \n\n## 我的想法\n\n",
+  },
+]
 
 function normalizeUrl(value: string) {
   const trimmed = value.trim()
@@ -133,6 +162,8 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
   const [tags, setTags] = useState(initialDraft.tags)
   const [linkedTaskIds, setLinkedTaskIds] = useState(initialDraft.linkedTaskIds)
   const [attachments, setAttachments] = useState<NoteAttachment[]>(initialDraft.attachments ?? [])
+  const [editorMode, setEditorMode] = useState<"rich" | "markdown">("rich")
+  const [markdownSource, setMarkdownSource] = useState(() => htmlToMarkdown(initialDraft.content))
   const [titleError, setTitleError] = useState(false)
   const [savedVisible, setSavedVisible] = useState(false)
   const [slashOpen, setSlashOpen] = useState(false)
@@ -205,6 +236,8 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
     setTags(initialDraft.tags)
     setLinkedTaskIds(initialDraft.linkedTaskIds)
     setAttachments(initialDraft.attachments ?? [])
+    setEditorMode("rich")
+    setMarkdownSource(htmlToMarkdown(initialDraft.content))
     setLinkedTasksOpen(false)
     editor?.commands.setContent(initialDraft.content, { emitUpdate: false })
   }, [editor, initialDraft])
@@ -260,6 +293,25 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
   function closeAfterSave() {
     saveDraft()
     onClose()
+  }
+
+  function switchEditorMode(mode: "rich" | "markdown") {
+    if (!editor || mode === editorMode) return
+    if (mode === "markdown") {
+      setMarkdownSource(htmlToMarkdown(editor.getHTML()))
+      setEditorMode("markdown")
+      return
+    }
+
+    const nextContent = markdownToHtml(markdownSource)
+    setContent(nextContent)
+    editor.commands.setContent(nextContent, { emitUpdate: false })
+    setEditorMode("rich")
+  }
+
+  function updateMarkdownSource(value: string) {
+    setMarkdownSource(value)
+    setContent(markdownToHtml(value))
   }
 
   function setLink() {
@@ -367,7 +419,22 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
   }
 
   function insertAttachmentOcrText(attachment: NoteAttachment) {
-    if (!editor || !attachment.ocrText?.trim()) return
+    if (!attachment.ocrText?.trim()) return
+    if (editorMode === "markdown") {
+      const quotedText = attachment.ocrText
+        .trim()
+        .split("\n")
+        .map((line) => `> ${line}`)
+        .join("\n")
+      setMarkdownSource((current) => {
+        const next = current.trim() ? `${current.trim()}\n\n${quotedText}` : quotedText
+        setContent(markdownToHtml(next))
+        return next
+      })
+      return
+    }
+
+    if (!editor) return
     editor
       .chain()
       .focus()
@@ -383,6 +450,23 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
     if (!editor) return
     const markdown = window.prompt("粘贴 Markdown 内容")
     if (!markdown) return
+    if (deleteShortcut) deleteTrigger(1)
+    editor.chain().focus().insertContent(markdownToHtml(markdown)).run()
+    setSlashOpen(false)
+  }
+
+  function insertTemplate(markdown: string, deleteShortcut = false) {
+    if (editorMode === "markdown") {
+      setMarkdownSource((current) => {
+        const next = current.trim() ? `${current.trim()}\n\n${markdown}` : markdown
+        setContent(markdownToHtml(next))
+        return next
+      })
+      setSlashOpen(false)
+      return
+    }
+
+    if (!editor) return
     if (deleteShortcut) deleteTrigger(1)
     editor.chain().focus().insertContent(markdownToHtml(markdown)).run()
     setSlashOpen(false)
@@ -453,8 +537,10 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
         <section className="min-h-0 overflow-y-auto p-4">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-[var(--ff-brand)]">Tiptap Editor</p>
-              <h2 className="text-xl font-medium text-[var(--ff-ink-900)] dark:text-[var(--ff-text)]">富文本笔记</h2>
+              <p className="text-sm font-medium text-[var(--ff-brand)]">{editorMode === "rich" ? "Tiptap Editor" : "Markdown Source"}</p>
+              <h2 className="text-xl font-medium text-[var(--ff-ink-900)] dark:text-[var(--ff-text)]">
+                {editorMode === "rich" ? "富文本笔记" : "Markdown 笔记"}
+              </h2>
             </div>
             <div className="flex items-center gap-2">
               {savedVisible ? (
@@ -499,9 +585,12 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
             {editor ? (
               <EditorToolbar
                 editor={editor}
+                mode={editorMode}
                 onInsertCode={() => insertCodeBlock(false)}
                 onLink={setLink}
                 onImportMarkdown={() => importMarkdown(false)}
+                onInsertTemplate={insertTemplate}
+                onModeChange={switchEditorMode}
                 onUploadImage={() => imageFileInputRef.current?.click()}
                 onUploadVideo={() => videoFileInputRef.current?.click()}
               />
@@ -530,7 +619,7 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
               }}
             />
 
-            {editor ? (
+            {editor && editorMode === "rich" ? (
               <BubbleMenu
                 editor={editor}
                 shouldShow={({ editor: activeEditor }) => !activeEditor.state.selection.empty}
@@ -552,7 +641,16 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
               </BubbleMenu>
             ) : null}
 
-            <EditorContent editor={editor} />
+            {editorMode === "markdown" ? (
+              <textarea
+                className="min-h-[360px] w-full resize-y bg-transparent px-4 py-3 font-mono text-sm leading-6 text-[var(--ff-ink-900)] outline-none placeholder:text-[var(--ff-ink-400)] dark:text-[var(--ff-text)]"
+                value={markdownSource}
+                onChange={(event) => updateMarkdownSource(event.target.value)}
+                placeholder="# 标题\n\n- 直接写 Markdown..."
+              />
+            ) : (
+              <EditorContent editor={editor} />
+            )}
 
             {slashOpen ? (
               <CommandPanel
@@ -560,6 +658,7 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
                 onInsertImage={insertImage}
                 onInsertVideo={insertVideo}
                 onImportMarkdown={importMarkdown}
+                onInsertTemplate={insertTemplate}
                 onOpenTasks={() => {
                   setTaskSearchOpen(true)
                   setSlashOpen(false)
@@ -720,21 +819,43 @@ export function NoteEditor({ note, noteGroups, reusableTags, tasks, onClose, onS
 
 function EditorToolbar({
   editor,
+  mode,
   onInsertCode,
   onLink,
   onImportMarkdown,
+  onInsertTemplate,
+  onModeChange,
   onUploadImage,
   onUploadVideo,
 }: {
   editor: NonNullable<ReturnType<typeof useEditor>>
+  mode: "rich" | "markdown"
   onInsertCode: () => void
   onLink: () => void
   onImportMarkdown: () => void
+  onInsertTemplate: (markdown: string) => void
+  onModeChange: (mode: "rich" | "markdown") => void
   onUploadImage: () => void
   onUploadVideo: () => void
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1 border-b border-[var(--ff-border)] bg-[var(--ff-surface-muted)] p-2">
+      <div className="mr-1 inline-flex rounded-lg border border-[var(--ff-border)] bg-[var(--ff-surface)] p-0.5">
+        <button
+          className={cn("rounded-md px-2.5 py-1.5 text-xs font-semibold transition", mode === "rich" ? "bg-[var(--ff-brand-soft)] text-[var(--ff-brand-text)]" : "text-[var(--ff-ink-500)]")}
+          type="button"
+          onClick={() => onModeChange("rich")}
+        >
+          富文本
+        </button>
+        <button
+          className={cn("rounded-md px-2.5 py-1.5 text-xs font-semibold transition", mode === "markdown" ? "bg-[var(--ff-brand-soft)] text-[var(--ff-brand-text)]" : "text-[var(--ff-ink-500)]")}
+          type="button"
+          onClick={() => onModeChange("markdown")}
+        >
+          Markdown
+        </button>
+      </div>
       <ToolbarButton active={editor.isActive("bold")} label="加粗" onClick={() => editor.chain().focus().toggleBold().run()} icon={<Bold className="h-4 w-4" />} />
       <ToolbarButton active={editor.isActive("italic")} label="斜体" onClick={() => editor.chain().focus().toggleItalic().run()} icon={<Italic className="h-4 w-4" />} />
       <ToolbarButton active={editor.isActive("underline")} label="下划线" onClick={() => editor.chain().focus().toggleUnderline().run()} icon={<UnderlineIcon className="h-4 w-4" />} />
@@ -747,8 +868,31 @@ function EditorToolbar({
       <ToolbarButton label="插入图片" onClick={onUploadImage} icon={<ImageIcon className="h-4 w-4" />} />
       <ToolbarButton label="插入视频" onClick={onUploadVideo} icon={<Video className="h-4 w-4" />} />
       <ToolbarButton label="导入 Markdown" onClick={onImportMarkdown} icon={<Pilcrow className="h-4 w-4" />} />
+      <TemplatePicker onInsertTemplate={onInsertTemplate} />
       <ToolbarButton active={editor.isActive("codeBlock")} label="代码块" onClick={onInsertCode} icon={<Code2 className="h-4 w-4" />} />
     </div>
+  )
+}
+
+function TemplatePicker({ onInsertTemplate }: { onInsertTemplate: (markdown: string) => void }) {
+  return (
+    <select
+      className="h-9 rounded-lg border border-[var(--ff-border)] bg-[var(--ff-surface)] px-2 text-xs font-semibold text-[var(--ff-ink-500)] outline-none transition hover:border-[var(--ff-border-strong)]"
+      aria-label="插入模板"
+      defaultValue=""
+      onChange={(event) => {
+        const template = noteTemplates.find((item) => item.id === event.target.value)
+        if (template) onInsertTemplate(template.markdown)
+        event.target.value = ""
+      }}
+    >
+      <option value="">模板</option>
+      {noteTemplates.map((template) => (
+        <option key={template.id} value={template.id}>
+          {template.label}
+        </option>
+      ))}
+    </select>
   )
 }
 
@@ -868,10 +1012,11 @@ interface CommandPanelProps {
   onInsertImage: () => void
   onInsertVideo: () => void
   onImportMarkdown: () => void
+  onInsertTemplate: (markdown: string, deleteShortcut?: boolean) => void
   onOpenTasks: () => void
 }
 
-function CommandPanel({ onInsertCode, onInsertImage, onInsertVideo, onImportMarkdown, onOpenTasks }: CommandPanelProps) {
+function CommandPanel({ onInsertCode, onInsertImage, onInsertVideo, onImportMarkdown, onInsertTemplate, onOpenTasks }: CommandPanelProps) {
   return (
     <motion.div
       className="ff-popover absolute left-4 top-16 z-20 w-64 rounded-xl border border-[var(--ff-border)] bg-[var(--ff-surface)] p-2"
@@ -882,6 +1027,14 @@ function CommandPanel({ onInsertCode, onInsertImage, onInsertVideo, onImportMark
       <CommandButton icon={<ImageIcon className="h-4 w-4" />} label="插入图片链接" onClick={onInsertImage} />
       <CommandButton icon={<Video className="h-4 w-4" />} label="插入视频链接" onClick={onInsertVideo} />
       <CommandButton icon={<Pilcrow className="h-4 w-4" />} label="导入 Markdown" onClick={onImportMarkdown} />
+      {noteTemplates.slice(0, 3).map((template) => (
+        <CommandButton
+          icon={<Sparkles className="h-4 w-4" />}
+          key={template.id}
+          label={`模板 · ${template.label}`}
+          onClick={() => onInsertTemplate(template.markdown, true)}
+        />
+      ))}
       <CommandButton icon={<Code2 className="h-4 w-4" />} label="代码块" onClick={onInsertCode} />
       <CommandButton icon={<ListChecks className="h-4 w-4" />} label="任务关联" onClick={onOpenTasks} />
     </motion.div>

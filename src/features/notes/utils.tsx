@@ -173,6 +173,81 @@ export function markdownToHtml(content: string): string {
   return html.join("")
 }
 
+export function htmlToMarkdown(content: string): string {
+  if (!content.trim()) return ""
+  if (typeof window === "undefined") return getPlainText(content)
+
+  const document = new window.DOMParser().parseFromString(normalizeNoteContent(content), "text/html")
+  const blocks = Array.from(document.body.childNodes).map(nodeToMarkdown).filter(Boolean)
+  return blocks.join("\n\n").trim()
+}
+
+function nodeToMarkdown(node: ChildNode): string {
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ""
+  if (!(node instanceof HTMLElement)) return ""
+
+  const tagName = node.tagName.toLowerCase()
+  const childText = () => Array.from(node.childNodes).map(inlineNodeToMarkdown).join("").trim()
+
+  if (tagName === "h1") return `# ${childText()}`
+  if (tagName === "h2") return `## ${childText()}`
+  if (tagName === "h3") return `### ${childText()}`
+  if (tagName === "blockquote") {
+    return childText()
+      .split("\n")
+      .map((line) => `> ${line}`)
+      .join("\n")
+  }
+  if (tagName === "hr") return "---"
+  if (tagName === "pre") {
+    const code = node.querySelector("code")
+    const language = Array.from(code?.classList ?? [])
+      .find((className) => className.startsWith("language-"))
+      ?.replace("language-", "") ?? ""
+    return `\`\`\`${language}\n${code?.textContent ?? node.textContent ?? ""}\n\`\`\``
+  }
+  if (tagName === "ul" && node.getAttribute("data-type") === "taskList") {
+    return Array.from(node.children)
+      .map((child) => {
+        const checked = child.getAttribute("data-checked") === "true" || child.querySelector("input")?.hasAttribute("checked")
+        return `- [${checked ? "x" : " "}] ${Array.from(child.childNodes).map(inlineNodeToMarkdown).join("").trim()}`
+      })
+      .join("\n")
+  }
+  if (tagName === "ul") {
+    return Array.from(node.children)
+      .map((child) => `- ${Array.from(child.childNodes).map(inlineNodeToMarkdown).join("").trim()}`)
+      .join("\n")
+  }
+  if (tagName === "ol") {
+    return Array.from(node.children)
+      .map((child, index) => `${index + 1}. ${Array.from(child.childNodes).map(inlineNodeToMarkdown).join("").trim()}`)
+      .join("\n")
+  }
+  if (tagName === "p") return childText()
+
+  return childText()
+}
+
+function inlineNodeToMarkdown(node: ChildNode): string {
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ""
+  if (!(node instanceof HTMLElement)) return ""
+
+  const tagName = node.tagName.toLowerCase()
+  const text = Array.from(node.childNodes).map(inlineNodeToMarkdown).join("")
+
+  if (tagName === "strong" || tagName === "b") return `**${text}**`
+  if (tagName === "em" || tagName === "i") return `*${text}*`
+  if (tagName === "s" || tagName === "strike") return `~~${text}~~`
+  if (tagName === "code") return `\`${node.textContent ?? ""}\``
+  if (tagName === "br") return "\n"
+  if (tagName === "a") return `[${text || node.getAttribute("href") || "链接"}](${node.getAttribute("href") || ""})`
+  if (tagName === "img") return `![${node.getAttribute("alt") || "图片"}](${node.getAttribute("src") || ""})`
+  if (tagName === "input") return ""
+
+  return text
+}
+
 function formatInlineMarkdown(text: string): string {
   return escapeHtml(text)
     .replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]+)")?\)/g, '<img src="$2" alt="$1" title="$3">')
