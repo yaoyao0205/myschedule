@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>yaoyaoflow Notion OAuth</title>
+    <style>
+      body {
+        display: grid;
+        min-height: 100vh;
+        margin: 0;
+        place-items: center;
+        background: #fafbfc;
+        color: #0e1117;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+      }
+
+      main {
+        max-width: 520px;
+        padding: 32px;
+        text-align: center;
+      }
+
+      a {
+        color: #3b7dd8;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>正在返回 yaoyaoflow</h1>
+      <p>如果桌面应用没有自动打开，请确认 yaoyaoflow 正在运行，然后重新授权。</p>
+      <p><a id="fallback" href="#">手动返回应用</a></p>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const next = new URL("yaoyaoflow://notion/callback");
+      for (const key of ["code", "state", "error"]) {
+        const value = params.get(key);
+        if (value) next.searchParams.set(key, value);
+      }
+      const target = next.toString();
+      document.getElementById("fallback").href = target;
+      window.location.replace(target);
+    </script>
+  </body>
+</html>
