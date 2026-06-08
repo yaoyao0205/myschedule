@@ -1,15 +1,17 @@
 import { CSS } from "@dnd-kit/utilities"
 import { useSortable } from "@dnd-kit/sortable"
 import { motion } from "framer-motion"
-import { CalendarDays, Check, CircleCheck, CircleX, GripVertical, LoaderCircle, Pencil, Trash2 } from "lucide-react"
+import { CalendarDays, Check, CircleCheck, CircleX, FileText, GripVertical, LoaderCircle, Pencil, Trash2 } from "lucide-react"
 import { format, parseISO } from "date-fns"
 import { cn } from "../../../lib/cn"
 import { useNotionStore } from "../../integrations/notion/store/notionStore"
+import type { Note } from "../../notes/types"
 import type { Task } from "../types"
 import { PriorityBadge } from "./PriorityBadge"
 
 interface SortableTaskCardProps {
   task: Task
+  linkedNotes?: Note[]
   selected: boolean
   onEdit: (task: Task) => void
   onDelete: (taskId: string) => void
@@ -33,6 +35,7 @@ function formatTaskDateTime(task: Task): string {
 
 export function SortableTaskCard({
   task,
+  linkedNotes = [],
   selected,
   onEdit,
   onDelete,
@@ -145,6 +148,12 @@ export function SortableTaskCard({
             {task.pomodoroCount > 0 ? (
               <span className="ff-tag px-2 py-0.5 text-[11px] sm:px-2.5 sm:py-1 sm:text-xs">
                 {task.pomodoroCount} 番茄
+              </span>
+            ) : null}
+            {linkedNotes.length ? (
+              <span className="ff-tag gap-1 px-2 py-0.5 text-[11px] sm:px-2.5 sm:py-1 sm:text-xs" title={linkedNotes.map((note) => note.title).join("、")}>
+                <FileText className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                {linkedNotes.length} 笔记
               </span>
             ) : null}
             {notionEnabled && syncState?.status ? <TaskSyncStatus status={syncState.status} /> : null}

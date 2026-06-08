@@ -1,9 +1,11 @@
 import { AnimatePresence } from "framer-motion"
+import type { Note } from "../../notes/types"
 import type { Task, TaskGroup as TaskGroupType } from "../types"
 import { SortableTaskCard } from "./SortableTaskCard"
 
 interface TaskGroupProps {
   group: TaskGroupType
+  notes: Note[]
   selectedTaskIds: string[]
   onEdit: (task: Task) => void
   onDelete: (taskId: string) => void
@@ -12,7 +14,7 @@ interface TaskGroupProps {
   onCreate: () => void
 }
 
-export function TaskGroup({ group, selectedTaskIds, onEdit, onDelete, onToggle, onSelect, onCreate }: TaskGroupProps) {
+export function TaskGroup({ group, notes, selectedTaskIds, onEdit, onDelete, onToggle, onSelect, onCreate }: TaskGroupProps) {
   const isEmpty = group.tasks.length === 0
 
   return (
@@ -35,6 +37,7 @@ export function TaskGroup({ group, selectedTaskIds, onEdit, onDelete, onToggle, 
               <SortableTaskCard
                 key={task.id}
                 task={task}
+                linkedNotes={notes.filter((note) => note.linkedTaskIds.includes(task.id))}
                 selected={selectedTaskIds.includes(task.id)}
                 onEdit={onEdit}
                 onDelete={onDelete}

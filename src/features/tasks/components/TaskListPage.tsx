@@ -14,6 +14,7 @@ import { CalendarCheck2, Clock3, FolderKanban, Flame, Plus, Search } from "lucid
 import { useTopBarSlot } from "../../../components/layout/topBarSlot"
 import { useToast } from "../../../components/ui/ToastProvider"
 import { cn } from "../../../lib/cn"
+import { useNoteStore } from "../../notes/store/noteStore"
 import { BulkActionBar } from "./BulkActionBar"
 import { TaskEditor } from "./TaskEditor"
 import { TaskGroup } from "./TaskGroup"
@@ -46,6 +47,7 @@ export function TaskListPage() {
     bulkComplete,
     bulkDelete,
   } = useTaskStore()
+  const notes = useNoteStore((state) => state.notes)
   const { notify } = useToast()
   const topBarSlot = useTopBarSlot()
   const [editingTask, setEditingTask] = useState<Task | undefined>()
@@ -301,6 +303,7 @@ export function TaskListPage() {
                       <TaskGroup
                         key={group.id}
                         group={group}
+                        notes={notes}
                         selectedTaskIds={selectedTaskIds}
                         onEdit={handleEdit}
                         onDelete={handleDeleteTask}
